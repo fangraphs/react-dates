@@ -79,6 +79,7 @@ const propTypes = forbidExtraProps({
   horizontalMonthPadding: nonNegativeInteger,
   renderKeyboardShortcutsButton: PropTypes.func,
   renderKeyboardShortcutsPanel: PropTypes.func,
+  showOnlyBaseballMonths: PropTypes.bool,
 
   // navigation props
   dayPickerNavigationInlineStyles: PropTypes.object,
@@ -149,6 +150,7 @@ export const defaultProps = {
   horizontalMonthPadding: 13,
   renderKeyboardShortcutsButton: undefined,
   renderKeyboardShortcutsPanel: undefined,
+  showOnlyBaseballMonths: false,
 
   // navigation props
   dayPickerNavigationInlineStyles: null,
@@ -795,6 +797,7 @@ class DayPicker extends React.PureComponent {
       onMonthChange,
       onYearChange,
       isRTL,
+      showOnlyBaseballMonths,
     } = this.props;
 
     const {
@@ -808,18 +811,40 @@ class DayPicker extends React.PureComponent {
 
     if (!monthTransition) return;
 
-    const newMonth = currentMonth.clone();
+    // console.log('forward', showOnlyBaseballMonths, currentMonth);
+    let incrementMonth = 1;
+    let presetNewMonth = null;
+    if (showOnlyBaseballMonths) {
+      // incrementMonth = 0;
+      presetNewMonth = currentMonth.clone();
+
+      if (monthTransition === NEXT_TRANSITION && currentMonth.month() >= 9) {
+        incrementMonth = 0;
+        presetNewMonth.add(1, 'year').month(2);
+      } else if (monthTransition === NEXT_TRANSITION && currentMonth.month() < 2) {
+        incrementMonth = 0;
+        presetNewMonth.month(2);
+      } else if (monthTransition === PREV_TRANSITION && currentMonth.month() < 3) {
+        incrementMonth = 0;
+        presetNewMonth.subtract(1, 'year').month(9);
+      } else if (monthTransition === PREV_TRANSITION && currentMonth.month() >= 10) {
+        incrementMonth = 0;
+        presetNewMonth.month(9);
+      }
+    }
+
+    const newMonth = presetNewMonth || currentMonth.clone();
     const firstDayOfWeek = this.getFirstDayOfWeek();
     if (monthTransition === PREV_TRANSITION) {
-      newMonth.subtract(1, 'month');
+      newMonth.subtract(incrementMonth, 'month');
       if (onPrevMonthClick) onPrevMonthClick(newMonth);
-      const newInvisibleMonth = newMonth.clone().subtract(1, 'month');
+      const newInvisibleMonth = newMonth.clone().subtract(incrementMonth, 'month');
       const numberOfWeeks = getNumberOfCalendarMonthWeeks(newInvisibleMonth, firstDayOfWeek);
       this.calendarMonthWeeks = [numberOfWeeks, ...this.calendarMonthWeeks.slice(0, -1)];
     } else if (monthTransition === NEXT_TRANSITION) {
-      newMonth.add(1, 'month');
+      newMonth.add(incrementMonth, 'month');
       if (onNextMonthClick) onNextMonthClick(newMonth);
-      const newInvisibleMonth = newMonth.clone().add(numberOfMonths, 'month');
+      const newInvisibleMonth = newMonth.clone().add(numberOfMonths + incrementMonth, 'month');
       const numberOfWeeks = getNumberOfCalendarMonthWeeks(newInvisibleMonth, firstDayOfWeek);
       this.calendarMonthWeeks = [...this.calendarMonthWeeks.slice(1), numberOfWeeks];
     } else if (monthTransition === MONTH_SELECTION_TRANSITION) {
@@ -1198,7 +1223,7 @@ class DayPicker extends React.PureComponent {
                   translationValue={translationValue}
                   enableOutsideDays={enableOutsideDays}
                   firstVisibleMonthIndex={firstVisibleMonthIndex}
-                  initialMonth={currentMonth}
+                  initialMonth={currentMonth} // controls what month is displayed
                   isAnimating={isCalendarMonthGridAnimating}
                   modifiers={modifiers}
                   orientation={orientation}

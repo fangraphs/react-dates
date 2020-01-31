@@ -2,6 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import { Portal } from 'react-portal';
+import PropTypes from 'prop-types';
 import { forbidExtraProps } from 'airbnb-prop-types';
 import { addEventListener } from 'consolidated-events';
 import isTouchDevice from 'is-touch-device';
@@ -41,6 +42,7 @@ import {
 const propTypes = forbidExtraProps({
   ...withStylesPropTypes,
   ...DateRangePickerShape,
+  showOnlyBaseballMonths: PropTypes.bool,
 });
 
 const defaultProps = {
@@ -105,6 +107,8 @@ const defaultProps = {
   navNext: null,
   renderNavPrevButton: null,
   renderNavNextButton: null,
+  showOnlyBaseballMonths: false,
+
 
   onPrevMonthClick() {},
   onNextMonthClick() {},
@@ -454,6 +458,7 @@ class DateRangePicker extends React.PureComponent {
       small,
       disabled,
       theme: { reactDates },
+      showOnlyBaseballMonths,
     } = this.props;
 
     const { dayPickerContainerStyles, isDayPickerFocused, showKeyboardShortcuts } = this.state;
@@ -548,6 +553,7 @@ class DateRangePicker extends React.PureComponent {
           transitionDuration={transitionDuration}
           disabled={disabled}
           horizontalMonthPadding={horizontalMonthPadding}
+          showOnlyBaseballMonths={showOnlyBaseballMonths}
         />
 
         {withFullScreenPortal && (

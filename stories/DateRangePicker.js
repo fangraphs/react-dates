@@ -4,6 +4,9 @@ import momentJalaali from 'moment-jalaali';
 import { storiesOf } from '@storybook/react';
 import { withInfo } from '@storybook/addon-info';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+import isInclusivelyBeforeDay from '../src/utils/isInclusivelyBeforeDay';
+import isSameDay from '../src/utils/isSameDay';
+
 
 import {
   VERTICAL_ORIENTATION,
@@ -27,6 +30,22 @@ const TestInput = props => (
     />
   </div>
 );
+
+const datesList = [
+  moment(),
+  moment().subtract(1, 'days'),
+  moment().subtract(3, 'days'),
+  moment().subtract(9, 'days'),
+  moment().add(10, 'days'),
+  moment().add(11, 'days'),
+  moment().add(12, 'days'),
+  moment().add(13, 'days'),
+];
+
+const datesListHighlight = [
+  moment('2019-10-30'),
+  moment('2019-10-15'),
+];
 
 class TestWrapper extends React.Component {
   constructor(props) {
@@ -123,5 +142,19 @@ storiesOf('DateRangePicker (DRP)', module)
       minDate={moment().subtract(2, 'months').startOf('month')}
       maxDate={moment().add(2, 'months').endOf('month')}
       numberOfMonths={2}
+    />
+  )))
+  .add('sean', withInfo()(() => (
+    <DateRangePickerWrapper
+      showOnlyBaseballMonths
+      transitionDuration={1}
+      enableOutsideDays={false}
+      disabled={false}
+      isOutsideRange={(day) => !isInclusivelyBeforeDay(day, moment())} // allows us to look backwards
+      isDayBlocked={(day1) => datesList.some((day2) => isSameDay(day1, day2))} // blocked can't click
+      isDayHighlighted={(day1) => datesListHighlight.some((day2) => {
+        // day1.add(1, 'days')
+        return isSameDay(day1, day2)
+      })}
     />
   )));

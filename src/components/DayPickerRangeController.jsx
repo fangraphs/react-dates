@@ -118,6 +118,7 @@ const propTypes = forbidExtraProps({
   dayAriaLabelFormat: PropTypes.string,
 
   isRTL: PropTypes.bool,
+  showOnlyBaseballMonths: PropTypes.bool,
 });
 
 const defaultProps = {
@@ -125,21 +126,21 @@ const defaultProps = {
   endDate: undefined, // TODO: use null
   minDate: null,
   maxDate: null,
-  onDatesChange() {},
+  onDatesChange() { },
   startDateOffset: undefined,
   endDateOffset: undefined,
 
   focusedInput: null,
-  onFocusChange() {},
-  onClose() {},
+  onFocusChange() { },
+  onClose() { },
 
   keepOpenOnDateSelect: false,
   minimumNights: 1,
   disabled: false,
-  isOutsideRange() {},
-  isDayBlocked() {},
-  isDayHighlighted() {},
-  getMinNightsForHoverDate() {},
+  isOutsideRange() { },
+  isDayBlocked() { },
+  isDayHighlighted() { },
+  getMinNightsForHoverDate() { },
   daysViolatingMinNightsCanBeClicked: false,
 
   // DayPicker props
@@ -163,9 +164,9 @@ const defaultProps = {
   noNavNextButton: false,
   noNavPrevButton: false,
 
-  onPrevMonthClick() {},
-  onNextMonthClick() {},
-  onOutsideClick() {},
+  onPrevMonthClick() { },
+  onNextMonthClick() { },
+  onOutsideClick() { },
 
   renderCalendarDay: undefined,
   renderDayContents: null,
@@ -182,11 +183,11 @@ const defaultProps = {
   horizontalMonthPadding: 13,
 
   // accessibility
-  onBlur() {},
+  onBlur() { },
   isFocused: false,
   showKeyboardShortcuts: false,
-  onTab() {},
-  onShiftTab() {},
+  onTab() { },
+  onShiftTab() { },
 
   // i18n
   monthFormat: 'MMMM YYYY',
@@ -195,6 +196,7 @@ const defaultProps = {
   dayAriaLabelFormat: undefined,
 
   isRTL: false,
+  showOnlyBaseballMonths: false,
 };
 
 const getChooseAvailableDatePhrase = (phrases, focusedInput) => {
@@ -915,6 +917,7 @@ export default class DayPickerRangeController extends React.PureComponent {
       minDate,
       numberOfMonths,
       onPrevMonthClick,
+      showOnlyBaseballMonths,
     } = this.props;
     const { currentMonth, visibleDays } = this.state;
 
@@ -923,10 +926,18 @@ export default class DayPickerRangeController extends React.PureComponent {
       newVisibleDays[month] = visibleDays[month];
     });
 
-    const prevMonth = currentMonth.clone().subtract(2, 'months');
-    const prevMonthVisibleDays = getVisibleDays(prevMonth, 1, enableOutsideDays, true);
+    let incrementMonth = 1;
 
-    const newCurrentMonth = currentMonth.clone().subtract(1, 'month');
+    if (showOnlyBaseballMonths) {
+      if (currentMonth.month() < 2) {
+        incrementMonth = 3 + currentMonth.month();
+      }
+    }
+
+    const prevMonth = currentMonth.clone().subtract(incrementMonth, 'months');
+    const prevMonthVisibleDays = getVisibleDays(prevMonth, incrementMonth, enableOutsideDays, true);
+
+    const newCurrentMonth = currentMonth.clone().subtract(incrementMonth, 'month');
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
@@ -941,12 +952,14 @@ export default class DayPickerRangeController extends React.PureComponent {
   }
 
   onNextMonthClick() {
+    // console.log(this.props)
     const {
       enableOutsideDays,
       maxDate,
       minDate,
       numberOfMonths,
       onNextMonthClick,
+      showOnlyBaseballMonths,
     } = this.props;
     const { currentMonth, visibleDays } = this.state;
 
@@ -955,9 +968,22 @@ export default class DayPickerRangeController extends React.PureComponent {
       newVisibleDays[month] = visibleDays[month];
     });
 
-    const nextMonth = currentMonth.clone().add(numberOfMonths + 1, 'month');
-    const nextMonthVisibleDays = getVisibleDays(nextMonth, 1, enableOutsideDays, true);
-    const newCurrentMonth = currentMonth.clone().add(1, 'month');
+    let incrementMonth = 1;
+
+    if (showOnlyBaseballMonths) {
+      if (currentMonth.month() >= 9) {
+        incrementMonth = 11 + 2 - currentMonth.month();
+      }
+      if (currentMonth.month() < 2) {
+        incrementMonth = 2 - currentMonth.month();
+      }
+    }
+
+    const nextMonth = currentMonth.clone().add(numberOfMonths + incrementMonth, 'month');
+    const nextMonthVisibleDays = getVisibleDays(nextMonth, incrementMonth, enableOutsideDays, true);
+
+    const newCurrentMonth = currentMonth.clone().add(incrementMonth, 'month');
+    // console.log(newCurrentMonth)
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
@@ -967,6 +993,7 @@ export default class DayPickerRangeController extends React.PureComponent {
         ...this.getModifiers(nextMonthVisibleDays),
       },
     }, () => {
+      console.timeLog(newCurrentMonth);
       onNextMonthClick(newCurrentMonth.clone());
     });
   }
@@ -1328,6 +1355,7 @@ export default class DayPickerRangeController extends React.PureComponent {
       transitionDuration,
       verticalBorderSpacing,
       horizontalMonthPadding,
+      showOnlyBaseballMonths,
     } = this.props;
 
     const {
@@ -1396,6 +1424,7 @@ export default class DayPickerRangeController extends React.PureComponent {
         noBorder={noBorder}
         transitionDuration={transitionDuration}
         horizontalMonthPadding={horizontalMonthPadding}
+        showOnlyBaseballMonths={showOnlyBaseballMonths}
       />
     );
   }

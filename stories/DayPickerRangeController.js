@@ -784,4 +784,14 @@ storiesOf('DayPickerRangeController', module)
       initialStartDate={moment().add(3, 'days')}
       autoFocusEndDate
     />
+  )))
+  .add('sean', withInfo()(() => (
+    <DayPickerRangeControllerWrapper
+      onOutsideClick={action('DayPickerRangeController::onOutsideClick')}
+      onPrevMonthClick={action('DayPickerRangeController::onPrevMonthClick')}
+      onNextMonthClick={action('DayPickerRangeController::onNextMonthClick')}
+      renderKeyboardShortcutsPanel={renderKeyboardShortcutsPanel}
+      showOnlyBaseballMonths
+      transitionDuration={1}
+    />
   )));

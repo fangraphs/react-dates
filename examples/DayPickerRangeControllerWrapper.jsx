@@ -2,7 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
-import { forbidExtraProps } from 'airbnb-prop-types';
+import { forbidExtraProps, nonNegativeInteger } from 'airbnb-prop-types';
 import moment from 'moment';
 import omit from 'lodash/omit';
 
@@ -54,6 +54,8 @@ const propTypes = forbidExtraProps({
   renderDayContents: PropTypes.func,
   renderKeyboardShortcutsButton: PropTypes.func,
   renderKeyboardShortcutsPanel: PropTypes.func,
+  showOnlyBaseballMonths: PropTypes.bool,
+  transitionDuration: nonNegativeInteger,
 
   // i18n
   monthFormat: PropTypes.string,
@@ -107,6 +109,9 @@ const defaultProps = {
 
   // internationalization
   monthFormat: 'MMMM YYYY',
+
+  showOnlyBaseballMonths: false,
+  transitionDuration: undefined,
 };
 
 class DayPickerRangeControllerWrapper extends React.Component {
