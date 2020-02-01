@@ -102,7 +102,8 @@ var propTypes = process.env.NODE_ENV !== "production" ? forbidExtraProps({
   weekDayFormat: PropTypes.string,
   phrases: PropTypes.shape(getPhrasePropTypes(DayPickerPhrases)),
   dayAriaLabelFormat: PropTypes.string,
-  isRTL: PropTypes.bool
+  isRTL: PropTypes.bool,
+  showOnlyBaseballMonths: PropTypes.bool
 }) : {};
 var defaultProps = {
   startDate: undefined,
@@ -171,7 +172,8 @@ var defaultProps = {
   weekDayFormat: 'dd',
   phrases: DayPickerPhrases,
   dayAriaLabelFormat: undefined,
-  isRTL: false
+  isRTL: false,
+  showOnlyBaseballMonths: false
 };
 
 var getChooseAvailableDatePhrase = function getChooseAvailableDatePhrase(phrases, focusedInput) {
@@ -880,7 +882,8 @@ function (_ref) {
         maxDate = _this$props6.maxDate,
         minDate = _this$props6.minDate,
         numberOfMonths = _this$props6.numberOfMonths,
-        onPrevMonthClick = _this$props6.onPrevMonthClick;
+        onPrevMonthClick = _this$props6.onPrevMonthClick,
+        showOnlyBaseballMonths = _this$props6.showOnlyBaseballMonths;
     var _this$state3 = this.state,
         currentMonth = _this$state3.currentMonth,
         visibleDays = _this$state3.visibleDays;
@@ -888,9 +891,17 @@ function (_ref) {
     Object.keys(visibleDays).sort().slice(0, numberOfMonths + 1).forEach(function (month) {
       newVisibleDays[month] = visibleDays[month];
     });
-    var prevMonth = currentMonth.clone().subtract(2, 'months');
-    var prevMonthVisibleDays = getVisibleDays(prevMonth, 1, enableOutsideDays, true);
-    var newCurrentMonth = currentMonth.clone().subtract(1, 'month');
+    var incrementMonth = 1;
+
+    if (showOnlyBaseballMonths) {
+      if (currentMonth.month() < 2) {
+        incrementMonth = 3 + currentMonth.month();
+      }
+    }
+
+    var prevMonth = currentMonth.clone().subtract(incrementMonth, 'months');
+    var prevMonthVisibleDays = getVisibleDays(prevMonth, incrementMonth, enableOutsideDays, true);
+    var newCurrentMonth = currentMonth.clone().subtract(incrementMonth, 'month');
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
@@ -902,12 +913,14 @@ function (_ref) {
   };
 
   _proto.onNextMonthClick = function onNextMonthClick() {
+    // console.log(this.props)
     var _this$props7 = this.props,
         enableOutsideDays = _this$props7.enableOutsideDays,
         maxDate = _this$props7.maxDate,
         minDate = _this$props7.minDate,
         numberOfMonths = _this$props7.numberOfMonths,
-        onNextMonthClick = _this$props7.onNextMonthClick;
+        onNextMonthClick = _this$props7.onNextMonthClick,
+        showOnlyBaseballMonths = _this$props7.showOnlyBaseballMonths;
     var _this$state4 = this.state,
         currentMonth = _this$state4.currentMonth,
         visibleDays = _this$state4.visibleDays;
@@ -915,15 +928,29 @@ function (_ref) {
     Object.keys(visibleDays).sort().slice(1).forEach(function (month) {
       newVisibleDays[month] = visibleDays[month];
     });
-    var nextMonth = currentMonth.clone().add(numberOfMonths + 1, 'month');
-    var nextMonthVisibleDays = getVisibleDays(nextMonth, 1, enableOutsideDays, true);
-    var newCurrentMonth = currentMonth.clone().add(1, 'month');
+    var incrementMonth = 1;
+
+    if (showOnlyBaseballMonths) {
+      if (currentMonth.month() >= 9) {
+        incrementMonth = 11 + 2 - currentMonth.month();
+      }
+
+      if (currentMonth.month() < 2) {
+        incrementMonth = 2 - currentMonth.month();
+      }
+    }
+
+    var nextMonth = currentMonth.clone().add(numberOfMonths + incrementMonth, 'month');
+    var nextMonthVisibleDays = getVisibleDays(nextMonth, incrementMonth, enableOutsideDays, true);
+    var newCurrentMonth = currentMonth.clone().add(incrementMonth, 'month'); // console.log(newCurrentMonth)
+
     this.setState({
       currentMonth: newCurrentMonth,
       disablePrev: this.shouldDisableMonthNavigation(minDate, newCurrentMonth),
       disableNext: this.shouldDisableMonthNavigation(maxDate, newCurrentMonth),
       visibleDays: _objectSpread({}, newVisibleDays, {}, this.getModifiers(nextMonthVisibleDays))
     }, function () {
+      console.timeLog(newCurrentMonth);
       onNextMonthClick(newCurrentMonth.clone());
     });
   };
@@ -1288,7 +1315,8 @@ function (_ref) {
         noBorder = _this$props22.noBorder,
         transitionDuration = _this$props22.transitionDuration,
         verticalBorderSpacing = _this$props22.verticalBorderSpacing,
-        horizontalMonthPadding = _this$props22.horizontalMonthPadding;
+        horizontalMonthPadding = _this$props22.horizontalMonthPadding,
+        showOnlyBaseballMonths = _this$props22.showOnlyBaseballMonths;
     var _this$state7 = this.state,
         currentMonth = _this$state7.currentMonth,
         phrases = _this$state7.phrases,
@@ -1353,7 +1381,8 @@ function (_ref) {
       verticalBorderSpacing: verticalBorderSpacing,
       noBorder: noBorder,
       transitionDuration: transitionDuration,
-      horizontalMonthPadding: horizontalMonthPadding
+      horizontalMonthPadding: horizontalMonthPadding,
+      showOnlyBaseballMonths: showOnlyBaseballMonths
     });
   };
 

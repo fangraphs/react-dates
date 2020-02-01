@@ -64,6 +64,7 @@ var propTypes = process.env.NODE_ENV !== "production" ? forbidExtraProps(_object
   horizontalMonthPadding: nonNegativeInteger,
   renderKeyboardShortcutsButton: PropTypes.func,
   renderKeyboardShortcutsPanel: PropTypes.func,
+  showOnlyBaseballMonths: PropTypes.bool,
   // navigation props
   dayPickerNavigationInlineStyles: PropTypes.object,
   disablePrev: PropTypes.bool,
@@ -132,6 +133,7 @@ export var defaultProps = {
   horizontalMonthPadding: 13,
   renderKeyboardShortcutsButton: undefined,
   renderKeyboardShortcutsPanel: undefined,
+  showOnlyBaseballMonths: false,
   // navigation props
   dayPickerNavigationInlineStyles: null,
   disablePrev: false,
@@ -796,7 +798,8 @@ function (_ref) {
         numberOfMonths = _this$props8.numberOfMonths,
         onMonthChange = _this$props8.onMonthChange,
         onYearChange = _this$props8.onYearChange,
-        isRTL = _this$props8.isRTL;
+        isRTL = _this$props8.isRTL,
+        showOnlyBaseballMonths = _this$props8.showOnlyBaseballMonths;
     var _this$state7 = this.state,
         currentMonth = _this$state7.currentMonth,
         monthTransition = _this$state7.monthTransition,
@@ -804,21 +807,44 @@ function (_ref) {
         nextFocusedDate = _this$state7.nextFocusedDate,
         withMouseInteractions = _this$state7.withMouseInteractions,
         calendarMonthWidth = _this$state7.calendarMonthWidth;
-    if (!monthTransition) return;
-    var newMonth = currentMonth.clone();
+    if (!monthTransition) return; // console.log('forward', showOnlyBaseballMonths, currentMonth);
+
+    var incrementMonth = 1;
+    var presetNewMonth = null;
+
+    if (showOnlyBaseballMonths) {
+      // incrementMonth = 0;
+      presetNewMonth = currentMonth.clone();
+
+      if (monthTransition === NEXT_TRANSITION && currentMonth.month() >= 9) {
+        incrementMonth = 0;
+        presetNewMonth.add(1, 'year').month(2);
+      } else if (monthTransition === NEXT_TRANSITION && currentMonth.month() < 2) {
+        incrementMonth = 0;
+        presetNewMonth.month(2);
+      } else if (monthTransition === PREV_TRANSITION && currentMonth.month() < 3) {
+        incrementMonth = 0;
+        presetNewMonth.subtract(1, 'year').month(9);
+      } else if (monthTransition === PREV_TRANSITION && currentMonth.month() >= 10) {
+        incrementMonth = 0;
+        presetNewMonth.month(9);
+      }
+    }
+
+    var newMonth = presetNewMonth || currentMonth.clone();
     var firstDayOfWeek = this.getFirstDayOfWeek();
 
     if (monthTransition === PREV_TRANSITION) {
-      newMonth.subtract(1, 'month');
+      newMonth.subtract(incrementMonth, 'month');
       if (onPrevMonthClick) onPrevMonthClick(newMonth);
-      var newInvisibleMonth = newMonth.clone().subtract(1, 'month');
+      var newInvisibleMonth = newMonth.clone().subtract(incrementMonth, 'month');
       var numberOfWeeks = getNumberOfCalendarMonthWeeks(newInvisibleMonth, firstDayOfWeek);
       this.calendarMonthWeeks = [numberOfWeeks].concat(_toConsumableArray(this.calendarMonthWeeks.slice(0, -1)));
     } else if (monthTransition === NEXT_TRANSITION) {
-      newMonth.add(1, 'month');
+      newMonth.add(incrementMonth, 'month');
       if (onNextMonthClick) onNextMonthClick(newMonth);
 
-      var _newInvisibleMonth = newMonth.clone().add(numberOfMonths, 'month');
+      var _newInvisibleMonth = newMonth.clone().add(numberOfMonths + incrementMonth, 'month');
 
       var _numberOfWeeks = getNumberOfCalendarMonthWeeks(_newInvisibleMonth, firstDayOfWeek);
 
@@ -1121,7 +1147,8 @@ function (_ref) {
       translationValue: translationValue,
       enableOutsideDays: enableOutsideDays,
       firstVisibleMonthIndex: firstVisibleMonthIndex,
-      initialMonth: currentMonth,
+      initialMonth: currentMonth // controls what month is displayed
+      ,
       isAnimating: isCalendarMonthGridAnimating,
       modifiers: modifiers,
       orientation: orientation,

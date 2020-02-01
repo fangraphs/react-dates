@@ -12,6 +12,7 @@ import React from 'react';
 import moment from 'moment';
 import { css, withStyles, withStylesPropTypes } from 'react-with-styles';
 import { Portal } from 'react-portal';
+import PropTypes from 'prop-types';
 import { forbidExtraProps } from 'airbnb-prop-types';
 import { addEventListener } from 'consolidated-events';
 import isTouchDevice from 'is-touch-device';
@@ -28,7 +29,9 @@ import DateRangePickerInputController from './DateRangePickerInputController';
 import DayPickerRangeController from './DayPickerRangeController';
 import CloseButton from './CloseButton';
 import { START_DATE, END_DATE, HORIZONTAL_ORIENTATION, VERTICAL_ORIENTATION, ANCHOR_LEFT, ANCHOR_RIGHT, OPEN_DOWN, OPEN_UP, DAY_SIZE, ICON_BEFORE_POSITION, INFO_POSITION_BOTTOM, FANG_HEIGHT_PX, DEFAULT_VERTICAL_SPACING, NAV_POSITION_TOP } from '../constants';
-var propTypes = process.env.NODE_ENV !== "production" ? forbidExtraProps(_objectSpread({}, withStylesPropTypes, {}, DateRangePickerShape)) : {};
+var propTypes = process.env.NODE_ENV !== "production" ? forbidExtraProps(_objectSpread({}, withStylesPropTypes, {}, DateRangePickerShape, {
+  showOnlyBaseballMonths: PropTypes.bool
+})) : {};
 var defaultProps = {
   // required props for a functional interactive DateRangePicker
   startDate: null,
@@ -88,6 +91,7 @@ var defaultProps = {
   navNext: null,
   renderNavPrevButton: null,
   renderNavNextButton: null,
+  showOnlyBaseballMonths: false,
   onPrevMonthClick: function onPrevMonthClick() {},
   onNextMonthClick: function onNextMonthClick() {},
   onClose: function onClose() {},
@@ -422,7 +426,8 @@ function (_ref) {
         horizontalMonthPadding = _this$props7.horizontalMonthPadding,
         small = _this$props7.small,
         disabled = _this$props7.disabled,
-        reactDates = _this$props7.theme.reactDates;
+        reactDates = _this$props7.theme.reactDates,
+        showOnlyBaseballMonths = _this$props7.showOnlyBaseballMonths;
     var _this$state = this.state,
         dayPickerContainerStyles = _this$state.dayPickerContainerStyles,
         isDayPickerFocused = _this$state.isDayPickerFocused,
@@ -498,7 +503,8 @@ function (_ref) {
       verticalHeight: verticalHeight,
       transitionDuration: transitionDuration,
       disabled: disabled,
-      horizontalMonthPadding: horizontalMonthPadding
+      horizontalMonthPadding: horizontalMonthPadding,
+      showOnlyBaseballMonths: showOnlyBaseballMonths
     }), withFullScreenPortal && React.createElement("button", _extends({}, css(styles.DateRangePicker_closeButton), {
       type: "button",
       onClick: this.onOutsideClick,
